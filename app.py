@@ -146,7 +146,7 @@ elif selected == "FECHAR ORDEM DE SERVIÇO DE MANUTENÇÃO":
         submitted_2 = st.form_submit_button("Submit")
 
         if submitted_2:
-            insert_status_to_db(status, engine)
+            insert_status_to_db(status, codigo_fechamento, engine)
             st.success("OSM registrada com sucesso!")
 
 

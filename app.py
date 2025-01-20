@@ -1,7 +1,9 @@
 import streamlit as st
 import pandas as pd
+import plotly.express as px
 import datetime as dt
 import numpy as np
+import plotly.graph_objects as go
 import requests
 import pytz
 from sqlalchemy import create_engine , text
@@ -31,9 +33,9 @@ def insert_data_to_db(codigo, data_abertura, tipo_manutencao, descricao, acao, m
     with engine.connect() as conn:  # Usar 'with' para garantir que a conexão será fechada automaticamente
         sql = """
         INSERT INTO dados_manutenção_2024_teste 
-        (`Código`, `Data Abertura/Hora`, `Tipo de Manutenção`, `Descrição da Falha`, `Ação de correção`, `Materiais necessários`, `Custo`)
+        (`Código`, `Data Abertura/Hora`, `Tipo de Manutenção`, `Descrição da Falha`, `Ação de correção`, `Materiais necessários`, `Custo`, `status`)
         VALUES 
-        (:codigo, :data_abertura, :tipo_manutencao, :descricao, :acao, :materiais, :custo)
+        (:codigo, :data_abertura, :tipo_manutencao, :descricao, :acao, :materiais, :custo, :status)
         """
         
         # Usando dicionário para passar parâmetros nomeados para a query
@@ -44,11 +46,36 @@ def insert_data_to_db(codigo, data_abertura, tipo_manutencao, descricao, acao, m
             'descricao': descricao,
             'acao': acao,
             'materiais': materiais,
-            'custo': custo
+            'custo': custo,
+            'status': status
         }
         
         conn.execute(text(sql), params)  # Passando os parâmetros como dicionário
         conn.connection.commit()
+
+def insert_status_to_db(status, engine):
+    with engine.connect() as conn:  # Usar 'with' para garantir que a conexão será fechada automaticamente
+        sql = """
+        UPDATE dados_manutenção_2024_teste 
+        SET `status` = :status
+        WHERE `Código` = :codigo
+        """
+        
+        # Usando dicionário para passar parâmetros nomeados para a query
+        params = {
+            'status': status,
+            'codigo': codigo_fechamento  # Supondo que o 'codigo' seja passado de algum lugar para identificar a linha
+        }
+        
+        conn.execute(text(sql), params)  # Passando os parâmetros como dicionário
+        conn.connection.commit()
+
+def fetch_data(_engine):
+    query_dados = "SELECT * FROM dados_manutenção_2024_teste"
+    dados = pd.read_sql(query_dados, engine)
+
+    return dados
+
 
 # Conexão com o banco de dados
 engine = get_db_connection()
@@ -69,7 +96,7 @@ if selected == "ABRIR ORDEM DE SERVIÇO DE MANUTENÇÃO":
     with st.form('my_form', clear_on_submit=True):
         st.write('Abertura de OSM')
 
-        codigo = st.text_input('Código Máquina')
+        codigo = st.text_input('Código Máquina ou Nome Máquina')
         
         data_abertura = dt.datetime.now()
         data_abertura = data_abertura.strftime("%Y/%m/%d %H:%M:%S")
@@ -102,3 +129,26 @@ if selected == "ABRIR ORDEM DE SERVIÇO DE MANUTENÇÃO":
         materiais = None
         custo = None
         status = None
+
+elif selected == "FECHAR ORDEM DE SERVIÇO DE MANUTENÇÃO":
+
+    dados = fetch_data(engine)
+
+    dados = dados[dados['status'] == 0]
+
+    with st.form('my_form_2',clear_on_submit=True):
+        data_fechamento = dt.datetime.now()
+        data_fechamento = data_fechamento.strftime("%Y/%m/%d %H:%M:%S")
+        
+        codigo_fechamento = st.selectbox('Código Máquina ou Nome Máquina', dados['Código'].unique())
+        data_fechamento_input = st.text_input('Data Fechamento', data_fechamento)
+
+        status = 1
+
+        submitted_2 = st.form_submit_button("Submit")
+
+        if submitted_2:
+            insert_status_to_db(status, engine)
+            st.success("OSM registrada com sucesso!")
+
+

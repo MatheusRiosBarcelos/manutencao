@@ -128,25 +128,25 @@ if selected == "ABRIR ORDEM DE SERVIÇO DE MANUTENÇÃO":
         custo = None
         status = None
 
-elif selected == "FECHAR ORDEM DE SERVIÇO DE MANUTENÇÃO":
+# elif selected == "FECHAR ORDEM DE SERVIÇO DE MANUTENÇÃO":
 
-    dados = fetch_data(engine)
+#     dados = fetch_data(engine)
 
-    dados = dados[dados['status'] == 0]
+#     dados = dados[dados['status'] == 0]
 
-    with st.form('my_form_2',clear_on_submit=True):
-        data_fechamento = dt.datetime.now()
-        data_fechamento = data_fechamento.strftime("%Y/%m/%d %H:%M:%S")
+#     # with st.form('my_form_2',clear_on_submit=True):
+#     #     data_fechamento = dt.datetime.now()
+#     #     data_fechamento = data_fechamento.strftime("%Y/%m/%d %H:%M:%S")
         
-        codigo_fechamento = st.selectbox('Código Máquina ou Nome Máquina', dados['Código'].unique())
-        data_fechamento_input = st.text_input('Data Fechamento', data_fechamento)
+#     #     codigo_fechamento = st.selectbox('Código Máquina ou Nome Máquina', dados['Código'].unique())
+#     #     data_fechamento_input = st.text_input('Data Fechamento', data_fechamento)
 
-        status = 1
+#     #     status = 1
 
-        submitted_2 = st.form_submit_button("Submit")
+#     #     submitted_2 = st.form_submit_button("Submit")
 
-        if submitted_2:
-            insert_status_to_db(status, codigo_fechamento, engine)
-            st.success("OSM registrada com sucesso!")
+#     #     if submitted_2:
+#     #         insert_status_to_db(status, codigo_fechamento, engine)
+#     #         st.success("OSM registrada com sucesso!")
 
 

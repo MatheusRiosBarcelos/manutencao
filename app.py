@@ -51,7 +51,7 @@ def insert_data_to_db(codigo, data_abertura, tipo_manutencao, descricao, acao, m
         conn.execute(text(sql), params)  # Passando os parâmetros como dicionário
         conn.connection.commit()
 
-def insert_status_to_db(status, engine):
+def insert_status_to_db(status, codigo_fechamento, engine):
     with engine.connect() as conn:  # Usar 'with' para garantir que a conexão será fechada automaticamente
         sql = """
         UPDATE dados_manutenção_2024_teste 
@@ -62,7 +62,7 @@ def insert_status_to_db(status, engine):
         # Usando dicionário para passar parâmetros nomeados para a query
         params = {
             'status': status,
-            'codigo': codigo_fechamento  # Supondo que o 'codigo' seja passado de algum lugar para identificar a linha
+            'codigo': codigo_fechamento  # Corrigido para passar o valor de 'codigo_fechamento'
         }
         
         conn.execute(text(sql), params)  # Passando os parâmetros como dicionário

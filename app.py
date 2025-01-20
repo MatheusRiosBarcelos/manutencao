@@ -1,9 +1,7 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
 import datetime as dt
 import numpy as np
-import plotly.graph_objects as go
 import requests
 import pytz
 from sqlalchemy import create_engine , text

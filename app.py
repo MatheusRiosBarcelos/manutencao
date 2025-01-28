@@ -12,6 +12,7 @@ from pandas.tseries.offsets import DateOffset
 from streamlit_option_menu import option_menu
 import math
 import mysql.connector
+from streamlit_js_eval import streamlit_js_eval
 
 
 @st.cache_resource
@@ -121,6 +122,8 @@ if selected == "ABRIR ORDEM DE SERVIÇO DE MANUTENÇÃO":
         if submitted:
             insert_data_to_db(codigo, data_abertura_input, tipo_manutencao, descricao, acao, materiais, custo, engine)
             st.success("OSM registrada com sucesso!")
+            streamlit_js_eval(js_expressions="parent.window.location.reload()")
+
 
         codigo = None
         data_abertura_input = None

@@ -10,3 +10,4 @@ sqlalchemy
 mysql-connector-python
 streamlit_autorefresh
 streamlit_option_menu
+streamlit_js_eval

@@ -30,32 +30,32 @@ def get_db_connection():
     
     return engine
 
-def insert_data_to_db(codigo, data_abertura, tipo_manutencao, descricao, acao, materiais, custo, engine):
-    with engine.connect() as conn:  # Usar 'with' para garantir que a conexão será fechada automaticamente
+def insert_data_to_db(codigo, data_abertura, tipo_manutencao, descricao, acao, materiais, custo, motivo,engine):
+    with engine.connect() as conn:
         sql = """
         INSERT INTO dados_manutencao
-        (`Código`, `Data Abertura/Hora`, `Tipo de Manutenção`, `Descrição da Falha`, `Ação de correção`, `Materiais necessários`, `Custo`, `status`)
+        (`Código`, `Data Abertura/Hora`, `Tipo de Manutenção`, `Descrição da Falha`,`Motivo da Falha`, `Ação de correção`, `Materiais necessários`, `Custo`, `status`)
         VALUES 
-        (:codigo, :data_abertura, :tipo_manutencao, :descricao, :acao, :materiais, :custo, :status)
+        (:codigo, :data_abertura, :tipo_manutencao, :descricao, :motivo, :acao, :materiais, :custo, :status)
         """
         
-        # Usando dicionário para passar parâmetros nomeados para a query
         params = {
             'codigo': codigo,
             'data_abertura': data_abertura,
             'tipo_manutencao': tipo_manutencao,
             'descricao': descricao,
+            'motivo': motivo,
             'acao': acao,
             'materiais': materiais,
             'custo': custo,
             'status': status
         }
         
-        conn.execute(text(sql), params)  # Passando os parâmetros como dicionário
+        conn.execute(text(sql), params)
         conn.connection.commit()
 
 def insert_status_to_db(status, codigo_fechamento, data_fechamento,engine):
-    with engine.connect() as conn:  # Usar 'with' para garantir que a conexão será fechada automaticamente
+    with engine.connect() as conn: 
         update_sql = """
         UPDATE dados_manutencao
         SET `status` = :status,
@@ -63,14 +63,13 @@ def insert_status_to_db(status, codigo_fechamento, data_fechamento,engine):
         WHERE `Código` = :codigo
         """
         
-        # Usando dicionário para passar parâmetros nomeados para a query
         params = {
             'status': status,
             'codigo': codigo_fechamento, 
             'data_fechamento': data_fechamento
         }
         
-        conn.execute(text(update_sql), params)  # Passando os parâmetros como dicionário
+        conn.execute(text(update_sql), params) 
 
         conn.connection.commit()
 
@@ -81,7 +80,6 @@ def fetch_data(_engine):
     return dados
 
 
-# Conexão com o banco de dados
 engine = get_db_connection()
 
 with st.sidebar:
@@ -112,6 +110,8 @@ if selected == "ABRIR ORDEM DE SERVIÇO DE MANUTENÇÃO":
 
         descricao = st.text_area('Descrição de Falha', height=100)
 
+        motivo = st.text_area('Motivo da falha', height=100)
+
         acao = st.text_area('Ação de Correção', height=100)
 
         materiais = st.text_area('Materiais Necessários', height=100)
@@ -123,10 +123,9 @@ if selected == "ABRIR ORDEM DE SERVIÇO DE MANUTENÇÃO":
         submitted = st.form_submit_button("Abrir OSM")
 
         if submitted:
-            insert_data_to_db(codigo, data_abertura_input, tipo_manutencao, descricao, acao, materiais, custo, engine)
+            insert_data_to_db(codigo, data_abertura_input, tipo_manutencao, descricao, acao, materiais, custo,motivo, engine)
             st.success("OSM registrada com sucesso!")
             streamlit_js_eval(js_expressions="parent.window.location.reload()")
-
 
         codigo = None
         data_abertura_input = None
@@ -140,7 +139,7 @@ if selected == "ABRIR ORDEM DE SERVIÇO DE MANUTENÇÃO":
 elif selected == "FECHAR ORDEM DE SERVIÇO DE MANUTENÇÃO":
 
     dados = fetch_data(engine)
-    print(dados.head(5))
+
     dados = dados[dados['status'] == 0]
 
     with st.form('my_form_2',clear_on_submit=True):

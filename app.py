@@ -143,7 +143,7 @@ elif selected == "FECHAR ORDEM DE SERVIÇO DE MANUTENÇÃO":
     dados = dados[dados['status'] == 0]
 
     with st.form('my_form_2',clear_on_submit=True):
-        data_fechamento = dt.datetime.now()
+        data_fechamento = dt.datetime.now(pytz.timezone('Brazil/East'))
         data_fechamento = data_fechamento.strftime("%Y/%m/%d %H:%M:%S")
         
         codigo_fechamento = st.selectbox('Código Máquina ou Nome Máquina', dados['Código'].unique())
@@ -156,5 +156,7 @@ elif selected == "FECHAR ORDEM DE SERVIÇO DE MANUTENÇÃO":
         if submitted_2:
             insert_status_to_db(status,codigo_fechamento, data_fechamento,engine)
             st.success("OSM registrada com sucesso!")
+            streamlit_js_eval(js_expressions="parent.window.location.reload()")
+
 
 

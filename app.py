@@ -13,6 +13,8 @@ from streamlit_option_menu import option_menu
 import math
 import mysql.connector
 from streamlit_js_eval import streamlit_js_eval
+import pytz
+
 
 
 @st.cache_resource
@@ -100,7 +102,7 @@ if selected == "ABRIR ORDEM DE SERVIÇO DE MANUTENÇÃO":
 
         codigo = st.text_input('Código Máquina ou Nome Máquina')
         
-        data_abertura = dt.datetime.now()
+        data_abertura = dt.datetime.now(pytz.timezone('Brazil/East'))
         data_abertura = data_abertura.strftime("%Y/%m/%d %H:%M:%S")
 
         data_abertura_input = st.text_input('Data Abertura', data_abertura)
@@ -117,7 +119,7 @@ if selected == "ABRIR ORDEM DE SERVIÇO DE MANUTENÇÃO":
 
         status = 0
 
-        submitted = st.form_submit_button("Submit")
+        submitted = st.form_submit_button("Abrir OSM")
 
         if submitted:
             insert_data_to_db(codigo, data_abertura_input, tipo_manutencao, descricao, acao, materiais, custo, engine)

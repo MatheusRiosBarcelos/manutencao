@@ -86,7 +86,7 @@ engine = get_db_connection()
 
 with st.sidebar:
     selected = option_menu(
-            "Menu",
+            "Selecione uma das Opções",
             [
                 "ABRIR ORDEM DE SERVIÇO DE MANUTENÇÃO",
                 "FECHAR ORDEM DE SERVIÇO DE MANUTENÇÃO"
@@ -99,7 +99,7 @@ with st.sidebar:
 
 if selected == "ABRIR ORDEM DE SERVIÇO DE MANUTENÇÃO":
     with st.form('my_form', clear_on_submit=True):
-        st.write('Abertura de OSM')
+        st.write('Abrir de OSM')
 
         codigo = st.text_input('Código Máquina ou Nome Máquina')
         

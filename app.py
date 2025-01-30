@@ -84,17 +84,18 @@ def fetch_data(_engine):
 # Conexão com o banco de dados
 engine = get_db_connection()
 
-selected = option_menu(
-        "Menu",
-        [
-            "ABRIR ORDEM DE SERVIÇO DE MANUTENÇÃO",
-            "FECHAR ORDEM DE SERVIÇO DE MANUTENÇÃO"
-        ],
-        icons=[ "list-task","list-task"],
-        menu_icon="list",
-        default_index=0,
-        orientation="vertical"
-    )
+with st.sidebar:
+    selected = option_menu(
+            "Menu",
+            [
+                "ABRIR ORDEM DE SERVIÇO DE MANUTENÇÃO",
+                "FECHAR ORDEM DE SERVIÇO DE MANUTENÇÃO"
+            ],
+            icons=[ "list-task","list-task"],
+            menu_icon="list",
+            default_index=0,
+            orientation="vertical"
+        )
 
 if selected == "ABRIR ORDEM DE SERVIÇO DE MANUTENÇÃO":
     with st.form('my_form', clear_on_submit=True):

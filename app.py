@@ -98,7 +98,7 @@ with st.sidebar:
 
 if selected == "ABRIR ORDEM DE SERVIÇO DE MANUTENÇÃO":
     with st.form('my_form', clear_on_submit=True):
-        st.markdown("<h3 style='font-size:26px;text-align:center;'>Abrir de OSM</h3>",unsafe_allow_html=True)
+        st.markdown("<h3 style='font-size:26px;text-align:center;'>Abrir OSM</h3>",unsafe_allow_html=True)
 
         codigo = st.text_input('Código Máquina ou Nome Máquina')
         
@@ -144,7 +144,7 @@ elif selected == "FECHAR ORDEM DE SERVIÇO DE MANUTENÇÃO":
     dados = dados[dados['status'] == 0]
 
     with st.form('my_form_2',clear_on_submit=True):
-        st.markdown("<h3 style='font-size:26px;text-align:center;'>Fechar de OSM</h3>",unsafe_allow_html=True)
+        st.markdown("<h3 style='font-size:26px;text-align:center;'>Fechar OSM</h3>",unsafe_allow_html=True)
         data_fechamento = dt.datetime.now(pytz.timezone('Brazil/East'))
         data_fechamento = data_fechamento.strftime("%Y/%m/%d %H:%M:%S")
         

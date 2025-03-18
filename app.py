@@ -15,15 +15,13 @@ import mysql.connector
 from streamlit_js_eval import streamlit_js_eval
 import pytz
 
-
-
 @st.cache_resource
 def get_db_connection():
-    username = 'usinag87_matheus'
+    username = 'capsys31_matheus'
     password = 'mineiro12369'
-    host = 'usinagemelohim.com.br'
+    host = '162.241.203.202'
     port = '3306'
-    database = 'usinag87_controleprod'
+    database = 'capsys31_elohim'
     
     connection_string = f'mysql+mysqlconnector://{username}:{password}@{host}:{port}/{database}'
     engine = create_engine(connection_string)
@@ -82,6 +80,9 @@ def fetch_data(_engine):
 
 engine = get_db_connection()
 
+st.image('logo.png', width= 150)
+
+
 with st.sidebar:
     selected = option_menu(
             "Selecione uma das Opções",
@@ -97,7 +98,7 @@ with st.sidebar:
 
 if selected == "ABRIR ORDEM DE SERVIÇO DE MANUTENÇÃO":
     with st.form('my_form', clear_on_submit=True):
-        st.write('Abrir de OSM')
+        st.markdown("<h3 style='font-size:26px;text-align:center;'>Abrir de OSM</h3>",unsafe_allow_html=True)
 
         codigo = st.text_input('Código Máquina ou Nome Máquina')
         
@@ -143,6 +144,7 @@ elif selected == "FECHAR ORDEM DE SERVIÇO DE MANUTENÇÃO":
     dados = dados[dados['status'] == 0]
 
     with st.form('my_form_2',clear_on_submit=True):
+        st.markdown("<h3 style='font-size:26px;text-align:center;'>Fechar de OSM</h3>",unsafe_allow_html=True)
         data_fechamento = dt.datetime.now(pytz.timezone('Brazil/East'))
         data_fechamento = data_fechamento.strftime("%Y/%m/%d %H:%M:%S")
         

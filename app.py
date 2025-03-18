@@ -22,7 +22,7 @@ def get_db_connection():
     MYSQL_HOST = st.secrets["MYSQL_HOST"]
     MYSQL_DATABASE = st.secrets["MYSQL_DATABASE"]
 
-    engine = create_engine(f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}/{MYSQL_DATABASE}")
+    engine = create_engine(f"mysql+pymysql://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{'3306'}/{MYSQL_DATABASE}")
     
     return engine
 

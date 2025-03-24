@@ -11,3 +11,4 @@ mysql-connector-python
 streamlit_autorefresh
 streamlit_option_menu
 streamlit_js_eval
+plotly==5.5.0

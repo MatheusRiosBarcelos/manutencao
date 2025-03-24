@@ -14,15 +14,19 @@ import math
 import mysql.connector
 from streamlit_js_eval import streamlit_js_eval
 import pytz
+import plotly.express as px
+
 
 @st.cache_resource
 def get_db_connection():
-    MYSQL_USER = st.secrets["MYSQL_USER"]
-    MYSQL_PASSWORD = st.secrets["MYSQL_PASSWORD"]
-    MYSQL_HOST = st.secrets["MYSQL_HOST"]
-    MYSQL_DATABASE = st.secrets["MYSQL_DATABASE"]
-
-    engine = create_engine(f"mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{'3306'}/{MYSQL_DATABASE}")
+    username = 'capsys31_matheus'
+    password = 'mineiro12369'
+    host = '162.241.203.202'
+    port = '3306'
+    database = 'capsys31_elohim'
+    
+    connection_string = f'mysql+mysqlconnector://{username}:{password}@{host}:{port}/{database}'
+    engine = create_engine(connection_string)
     
     return engine
 
@@ -75,20 +79,27 @@ def fetch_data(_engine):
 
     return dados
 
+header_styles = {
+    'selector': 'th.col_heading',
+    'props': [('background-color', 'grey'), 
+              ('color', 'black'),
+              ('font-size', '18px'),
+              ('font-weight', 'bold')]
+}
 
 engine = get_db_connection()
-
+st.set_page_config(layout="wide")
 st.image('logo.png', width= 150)
-
 
 with st.sidebar:
     selected = option_menu(
             "Selecione uma das Opções",
             [
                 "ABRIR ORDEM DE SERVIÇO DE MANUTENÇÃO",
-                "FECHAR ORDEM DE SERVIÇO DE MANUTENÇÃO"
+                "FECHAR ORDEM DE SERVIÇO DE MANUTENÇÃO",
+                "ACOMPANHAMENTO OSM"
             ],
-            icons=[ "list-task","list-task"],
+            icons=[ "list-task","list-task","list-task"],
             menu_icon="list",
             default_index=0,
             orientation="vertical"
@@ -158,5 +169,53 @@ elif selected == "FECHAR ORDEM DE SERVIÇO DE MANUTENÇÃO":
             st.success("OSM registrada com sucesso!")
             streamlit_js_eval(js_expressions="parent.window.location.reload()")
 
+elif selected == "ACOMPANHAMENTO OSM":
+    df = fetch_data(engine)
+    
+    df.sort_values(by = 'Data Abertura/Hora', ascending = False, inplace = True)
 
+    target_year = st.selectbox("Ano", df["Data Abertura/Hora"].dropna().dt.year.astype(int).sort_values().unique(), key=2, index=1, placeholder='Escolha uma opção')
 
+    df = df[df['Data Abertura/Hora'].dt.year == target_year]
+
+    mask_1 = df['status'] == 1
+    slice_1 = pd.IndexSlice[mask_1[mask_1].index, ['Código', 'Data Abertura/Hora', 'Data Fechamento/Hora', 'Descrição da Falha', 'Tipo de Manutenção', 'Motivo da Falha', 'Ação de correção', 'Materiais necessários', 'Custo']] 
+
+    mask_2 = df['status'] == 0
+    slice_2 = pd.IndexSlice[mask_2[mask_2].index, ['Código', 'Data Abertura/Hora', 'Data Fechamento/Hora', 'Descrição da Falha', 'Tipo de Manutenção', 'Motivo da Falha', 'Ação de correção', 'Materiais necessários', 'Custo']] 
+
+    df['month'] = df['Data Abertura/Hora'].dt.month 
+    st.table(df[['Código', 'Data Abertura/Hora', 'Data Fechamento/Hora', 'Descrição da Falha', 'Tipo de Manutenção', 'Motivo da Falha', 'Ação de correção', 'Materiais necessários', 'Custo']].style.set_table_styles([header_styles]).set_properties(**{'background-color': '#8efaa4'},subset=slice_1).set_properties(**{'background-color': '#fc5b5b'},subset=slice_2))
+
+    col1, col2 = st.columns(2)
+
+    df_group_month = df.groupby('month', as_index=False)['Custo'].sum()
+
+    df_group_month['Custo_label'] = df_group_month['Custo'].apply(lambda x: f"R${x:.2f}")
+
+    fig_1 = px.bar(df_group_month,x = 'month', y = 'Custo',title= 'Custo Mensal de Manutenção',text='Custo_label', width=800, height=600)
+    fig_1.update_traces(textfont_size=16, textangle=0, textposition="outside", cliponaxis=False, marker_color='#e53737', )
+    fig_1.update_layout(yaxis_title = 'Custo (R$)', xaxis_title = 'Mês', title_x = 0.55, title_y = 0.95,title_xanchor = 'center',xaxis=dict(tickfont=dict(size=14)),title=dict(font=dict(size=16)), showlegend=False)
+    fig_1.update_xaxes(tickmode='linear',dtick=1)
+
+    col1.plotly_chart(fig_1)
+
+    df_group_month_size = df.groupby('month', as_index=False).size()
+
+    fig_2 = px.bar(df_group_month_size,x = 'month', y = 'size',title= 'Quantidade de Manutenções Mensais',text='size', width=800, height=600)
+    fig_2.update_traces(textfont_size=16, textangle=0, textposition="outside", cliponaxis=False, marker_color='#e53737', )
+    fig_2.update_layout(yaxis_title = 'Quantidade de Manutenções', xaxis_title = 'Mês', title_x = 0.55, title_y = 0.95,title_xanchor = 'center',xaxis=dict(tickfont=dict(size=14)),title=dict(font=dict(size=16)), showlegend=False)
+    fig_2.update_xaxes(tickmode='linear',dtick=1)
+    fig_2.update_yaxes(tickmode='linear',dtick=1)
+
+    col2.plotly_chart(fig_2)
+
+    df_group_codigo_size = df.groupby('Código', as_index = False).size()
+
+    fig_3 = px.bar(df_group_codigo_size,x = 'Código', y = 'size',title= 'Quantidade de Manutenções por Máquina',text='size', height=600)
+    fig_3.update_traces(textfont_size=16, textangle=0, textposition="outside", cliponaxis=False, marker_color='#e53737', )
+    fig_3.update_layout(yaxis_title = 'Quantidade de Manutenções', xaxis_title = 'Código', title_x = 0.55, title_y = 0.95,title_xanchor = 'center',xaxis=dict(tickfont=dict(size=14)),title=dict(font=dict(size=16)), showlegend=False)
+    fig_3.update_xaxes(tickmode='linear',dtick=1)
+    fig_3.update_yaxes(tickmode='linear',dtick=1)
+
+    st.plotly_chart(fig_3)

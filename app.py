@@ -16,15 +16,16 @@ from streamlit_js_eval import streamlit_js_eval
 import pytz
 import plotly.express as px
 
-
 @st.cache_resource
 def get_db_connection():
-    MYSQL_USER = st.secrets["MYSQL_USER"]
-    MYSQL_PASSWORD = st.secrets["MYSQL_PASSWORD"]
-    MYSQL_HOST = st.secrets["MYSQL_HOST"]
-    MYSQL_DATABASE = st.secrets["MYSQL_DATABASE"]
-
-    engine = create_engine(f"mysql+mysqlconnector://{MYSQL_USER}:{MYSQL_PASSWORD}@{MYSQL_HOST}:{'3306'}/{MYSQL_DATABASE}")
+    username = 'capsys31_matheus'
+    password = 'mineiro12369'
+    host = '162.241.203.202'
+    port = '3306'
+    database = 'capsys31_elohim'
+    
+    connection_string = f'mysql+mysqlconnector://{username}:{password}@{host}:{port}/{database}'
+    engine = create_engine(connection_string)
     
     return engine
 
@@ -170,9 +171,9 @@ elif selected == "FECHAR ORDEM DE SERVIÇO DE MANUTENÇÃO":
 elif selected == "ACOMPANHAMENTO OSM":
     df = fetch_data(engine)
     
-    df.sort_values(by = 'Data Abertura/Hora', ascending = False, inplace = True)
+    df.sort_values(by = 'Data Abertura/Hora', ascending = False, ignore_index=True, inplace = True)
 
-    target_year = st.selectbox("Ano", df["Data Abertura/Hora"].dropna().dt.year.astype(int).sort_values().unique(), key=2, index=1, placeholder='Escolha uma opção')
+    target_year = st.selectbox("Selecione o ano desejado", df["Data Abertura/Hora"].dropna().dt.year.astype(int).sort_values().unique(), key=2, index=1, placeholder='Escolha uma opção')
 
     df = df[df['Data Abertura/Hora'].dt.year == target_year]
 
@@ -183,7 +184,10 @@ elif selected == "ACOMPANHAMENTO OSM":
     slice_2 = pd.IndexSlice[mask_2[mask_2].index, ['Código', 'Data Abertura/Hora', 'Data Fechamento/Hora', 'Descrição da Falha', 'Tipo de Manutenção', 'Motivo da Falha', 'Ação de correção', 'Materiais necessários', 'Custo']] 
 
     df['month'] = df['Data Abertura/Hora'].dt.month 
-    st.table(df[['Código', 'Data Abertura/Hora', 'Data Fechamento/Hora', 'Descrição da Falha', 'Tipo de Manutenção', 'Motivo da Falha', 'Ação de correção', 'Materiais necessários', 'Custo']].style.set_table_styles([header_styles]).set_properties(**{'background-color': '#8efaa4'},subset=slice_1).set_properties(**{'background-color': '#fc5b5b'},subset=slice_2))
+
+    custo_total_anual = df['Custo'].sum()
+
+    st.metric(label = f'Custo Anual Total {target_year}',value = f'R${custo_total_anual:.2f}')
 
     col1, col2 = st.columns(2)
 
@@ -217,3 +221,56 @@ elif selected == "ACOMPANHAMENTO OSM":
     fig_3.update_yaxes(tickmode='linear',dtick=1)
 
     st.plotly_chart(fig_3)
+
+    st.table(df[['Código', 'Data Abertura/Hora', 'Data Fechamento/Hora', 'Descrição da Falha', 'Tipo de Manutenção', 'Motivo da Falha', 'Ação de correção', 'Materiais necessários', 'Custo']].style.set_table_styles([header_styles]).set_properties(**{'background-color': '#8efaa4'},subset=slice_1).set_properties(**{'background-color': '#fc5b5b'},subset=slice_2))
+
+
+
+
+st.markdown("""
+    <style>
+    /* Centralizar o conteúdo dentro do label do st.metric */
+    [data-testid="stMetricLabel"] {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Centralizar o conteúdo interno do label */
+    [data-testid="stMetricLabel"] div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+    }
+
+    /* Centralizar o valor do st.metric */
+    [data-testid="stMetricValue"] {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Centralizar o conteúdo interno do valor */
+    [data-testid="stMetricValue"] div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+    }
+    /* Centralizar o valor do st.metric */
+    [data-testid="stMetricDelta"] {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Centralizar o conteúdo interno do valor */
+    [data-testid="stMetricDelta"] div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+    }
+    </style>
+    """, unsafe_allow_html=True)
